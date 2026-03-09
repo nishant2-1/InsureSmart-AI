@@ -4,6 +4,9 @@ import os
 import openai
 
 
+OFFLINE_MESSAGE = 'The AI advisor is currently offline, please check our manual policy list.'
+
+
 INSURANCE_POLICIES = [
     {
         'id': 1,
@@ -48,7 +51,7 @@ INSURANCE_POLICIES = [
 ]
 
 
-def _keyword_fallback_recommendation(user_input):
+def _keyword_fallback_recommendation(user_input, offline=False):
     text = user_input.lower()
     if 'health' in text or 'medical' in text:
         recommended = [policy for policy in INSURANCE_POLICIES if policy['category'] == 'Health']
@@ -63,7 +66,7 @@ def _keyword_fallback_recommendation(user_input):
 
     top_policy = recommended[0] if recommended else None
     return {
-        'summary': 'Recommendation generated from rule-based advisor because AI provider is unavailable.',
+        'summary': OFFLINE_MESSAGE if offline else 'Recommendation generated from local policy rules.',
         'recommended_policy_name': top_policy['name'] if top_policy else None,
         'reason': 'The selected policy best matches your stated insurance intent and coverage needs.',
         'recommendations': recommended[:2],
@@ -85,7 +88,7 @@ def _parse_ai_json(content):
 def get_policy_advice(user_input):
     api_key = os.getenv('OPENAI_API_KEY', '').strip()
     if not api_key or api_key.startswith('your_'):
-        return _keyword_fallback_recommendation(user_input)
+        return _keyword_fallback_recommendation(user_input, offline=True)
 
     openai.api_key = api_key
     model = os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
@@ -125,5 +128,7 @@ def get_policy_advice(user_input):
             'recommendations': matched,
             'provider': 'openai'
         }
+    except openai.error.OpenAIError:
+        return _keyword_fallback_recommendation(user_input, offline=True)
     except Exception:
-        return _keyword_fallback_recommendation(user_input)
+        return _keyword_fallback_recommendation(user_input, offline=True)
