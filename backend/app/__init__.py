@@ -2,10 +2,12 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+from flask_bcrypt import Bcrypt
 import os
 
 db = SQLAlchemy()
 jwt = JWTManager()
+bcrypt = Bcrypt()
 
 def create_app():
     app = Flask(__name__)
@@ -18,6 +20,7 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     jwt.init_app(app)
+    bcrypt.init_app(app)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
     
     # Register blueprints
