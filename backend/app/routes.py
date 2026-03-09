@@ -1,9 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from app import db
-from app.models import User, Policy, Claim, ChatHistory
+from app.repositories import user_repository, policy_repository, chat_history_repository
 from app.ai_service import get_policy_advice
-from datetime import datetime, timedelta
 
 # Blueprints
 core_bp = Blueprint('core', __name__, url_prefix='/api')
@@ -23,31 +21,31 @@ def hello_world():
 # Auth Routes
 @auth_bp.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
+    data = request.get_json() or {}
     
     if not data or not data.get('email') or not data.get('password') or not data.get('full_name'):
         return jsonify({'error': 'Missing required fields'}), 400
     
-    if User.query.filter_by(email=data['email']).first():
+    if user_repository.get_by_email(data['email']):
         return jsonify({'error': 'Email already registered'}), 409
-    
-    user = User(email=data['email'], full_name=data['full_name'])
-    user.set_password(data['password'])
-    
-    db.session.add(user)
-    db.session.commit()
+
+    user = user_repository.create_user(
+        email=data['email'],
+        full_name=data['full_name'],
+        password=data['password']
+    )
     
     return jsonify({'message': 'User registered successfully', 'user': user.to_dict()}), 201
 
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
+    data = request.get_json() or {}
     
     if not data or not data.get('email') or not data.get('password'):
         return jsonify({'error': 'Missing email or password'}), 400
     
-    user = User.query.filter_by(email=data['email']).first()
+    user = user_repository.get_by_email(data['email'])
     
     if not user or not user.check_password(data['password']):
         return jsonify({'error': 'Invalid email or password'}), 401
@@ -64,7 +62,7 @@ def login():
 @jwt_required()
 def get_user():
     user_id = get_jwt_identity()
-    user = User.query.get(user_id)
+    user = user_repository.get_by_id(user_id)
     
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -77,7 +75,7 @@ def get_user():
 @jwt_required()
 def get_policies():
     user_id = get_jwt_identity()
-    policies = Policy.query.filter_by(user_id=user_id).all()
+    policies = policy_repository.list_for_user(user_id)
     
     return jsonify([policy.to_dict() for policy in policies]), 200
 
@@ -86,23 +84,13 @@ def get_policies():
 @jwt_required()
 def create_policy():
     user_id = get_jwt_identity()
-    data = request.get_json()
+    data = request.get_json() or {}
     
     required_fields = ['policy_type', 'coverage_amount', 'monthly_premium']
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing required fields'}), 400
     
-    policy = Policy(
-        user_id=user_id,
-        policy_type=data['policy_type'],
-        coverage_amount=data['coverage_amount'],
-        monthly_premium=data['monthly_premium'],
-        description=data.get('description', ''),
-        end_date=datetime.utcnow() + timedelta(days=365)
-    )
-    
-    db.session.add(policy)
-    db.session.commit()
+    policy = policy_repository.create_policy(user_id, data)
     
     return jsonify({'message': 'Policy created', 'policy': policy.to_dict()}), 201
 
@@ -111,7 +99,7 @@ def create_policy():
 @jwt_required()
 def get_policy(policy_id):
     user_id = get_jwt_identity()
-    policy = Policy.query.filter_by(id=policy_id, user_id=user_id).first()
+    policy = policy_repository.get_for_user(policy_id, user_id)
     
     if not policy:
         return jsonify({'error': 'Policy not found'}), 404
@@ -124,12 +112,12 @@ def get_policy(policy_id):
 @jwt_required()
 def get_claims(policy_id):
     user_id = get_jwt_identity()
-    policy = Policy.query.filter_by(id=policy_id, user_id=user_id).first()
+    policy = policy_repository.get_for_user(policy_id, user_id)
     
     if not policy:
         return jsonify({'error': 'Policy not found'}), 404
     
-    claims = Claim.query.filter_by(policy_id=policy_id).all()
+    claims = policy_repository.list_claims_for_policy(policy_id)
     return jsonify([claim.to_dict() for claim in claims]), 200
 
 
@@ -137,25 +125,17 @@ def get_claims(policy_id):
 @jwt_required()
 def create_claim(policy_id):
     user_id = get_jwt_identity()
-    policy = Policy.query.filter_by(id=policy_id, user_id=user_id).first()
+    policy = policy_repository.get_for_user(policy_id, user_id)
     
     if not policy:
         return jsonify({'error': 'Policy not found'}), 404
     
-    data = request.get_json()
+    data = request.get_json() or {}
     
     if not data or not data.get('claim_amount') or not data.get('description'):
         return jsonify({'error': 'Missing required fields'}), 400
     
-    claim = Claim(
-        user_id=user_id,
-        policy_id=policy_id,
-        claim_amount=data['claim_amount'],
-        description=data['description']
-    )
-    
-    db.session.add(claim)
-    db.session.commit()
+    claim = policy_repository.create_claim(user_id, policy_id, data)
     
     return jsonify({'message': 'Claim submitted', 'claim': claim.to_dict()}), 201
 
@@ -173,14 +153,12 @@ def policy_advisor():
 
     advisor_result = get_policy_advice(user_input)
 
-    chat_entry = ChatHistory(
+    chat_entry = chat_history_repository.create_entry(
         user_id=user_id,
         user_prompt=user_input,
         ai_summary=advisor_result['summary'],
         recommended_policy_name=advisor_result.get('recommended_policy_name')
     )
-    db.session.add(chat_entry)
-    db.session.commit()
 
     recommendations = advisor_result.get('recommendations', [])
     return jsonify({
@@ -196,12 +174,6 @@ def policy_advisor():
 @jwt_required()
 def get_advisor_history():
     user_id = get_jwt_identity()
-    history_rows = (
-        ChatHistory.query
-        .filter_by(user_id=user_id)
-        .order_by(ChatHistory.created_at.desc())
-        .limit(20)
-        .all()
-    )
+    history_rows = chat_history_repository.list_recent_for_user(user_id, limit=20)
 
     return jsonify([entry.to_dict() for entry in history_rows]), 200
