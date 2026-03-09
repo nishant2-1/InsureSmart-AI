@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app import db
-from app.models import User, Policy, Claim
+from app.models import User, Policy, Claim, ChatHistory
+from app.ai_service import get_policy_advice
 from datetime import datetime, timedelta
 
 # Blueprints
@@ -161,30 +162,46 @@ def create_claim(policy_id):
 
 # AI Routes
 @ai_bp.route('/policy-advisor', methods=['POST'])
+@jwt_required()
 def policy_advisor():
-    data = request.get_json()
-    user_input = data.get('user_input', '')
-    
-    # Predefined policies (in production, use OpenAI API)
-    policies_db = [
-        {'id': 1, 'name': 'Basic Health', 'monthly':30, 'coverage': 50000, 'description': 'Best for individuals'},
-        {'id': 2, 'name': 'Premium Health', 'monthly': 50, 'coverage': 200000, 'description': 'Full family coverage'},
-        {'id': 3, 'name': 'Auto Shield', 'monthly': 25, 'coverage': 100000, 'description': 'Car insurance'},
-        {'id': 4, 'name': 'Home Guard', 'monthly': 35, 'coverage': 300000, 'description': 'Property protection'},
-    ]
-    
-    # Simple keyword matching (replace with OpenAI later)
-    keywords = user_input.lower()
-    if 'health' in keywords:
-        recommended = [p for p in policies_db if 'health' in p['name'].lower()]
-    elif 'car' in keywords or 'auto' in keywords:
-        recommended = [p for p in policies_db if 'auto' in p['name'].lower()]
-    elif 'home' in keywords or 'house' in keywords:
-        recommended = [p for p in policies_db if 'home' in p['name'].lower()]
-    else:
-        recommended = policies_db
-    
+    user_id = get_jwt_identity()
+    data = request.get_json() or {}
+    user_input = data.get('user_input', '').strip()
+
+    if not user_input:
+        return jsonify({'error': 'user_input is required'}), 400
+
+    advisor_result = get_policy_advice(user_input)
+
+    chat_entry = ChatHistory(
+        user_id=user_id,
+        user_prompt=user_input,
+        ai_summary=advisor_result['summary'],
+        recommended_policy_name=advisor_result.get('recommended_policy_name')
+    )
+    db.session.add(chat_entry)
+    db.session.commit()
+
+    recommendations = advisor_result.get('recommendations', [])
     return jsonify({
-        'message': f'Found {len(recommended)} policies for you',
-        'recommendations': recommended[:2]
+        'message': advisor_result['summary'],
+        'reason': advisor_result.get('reason', ''),
+        'provider': advisor_result.get('provider', 'fallback'),
+        'recommendations': recommendations,
+        'chat_entry': chat_entry.to_dict()
     }), 200
+
+
+@ai_bp.route('/history', methods=['GET'])
+@jwt_required()
+def get_advisor_history():
+    user_id = get_jwt_identity()
+    history_rows = (
+        ChatHistory.query
+        .filter_by(user_id=user_id)
+        .order_by(ChatHistory.created_at.desc())
+        .limit(20)
+        .all()
+    )
+
+    return jsonify([entry.to_dict() for entry in history_rows]), 200

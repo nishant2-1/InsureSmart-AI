@@ -12,6 +12,11 @@ System context:
 - MySQL stores persistent relational data.
 - JWT secures protected requests.
 
+Three-tier flow:
+1. Presentation tier: React captures insurance intent from authenticated users.
+2. Logic tier: Flask validates identity and generates advisor output from OpenAI with a fallback engine.
+3. Storage tier: MySQL persists user profiles, selected policies, and AI consultation history.
+
 ## Architecture Diagram
 
 ```
@@ -77,6 +82,7 @@ System context:
 - `users`: account identity and credentials
 - `policies`: user policy ownership and lifecycle data
 - `claims`: claim records tied to user and policy
+- `chat_history`: advisor prompt, summary, recommended policy, and timestamp
 
 ### API Contract
 
@@ -84,7 +90,6 @@ Public endpoints:
 - `GET /api/hello`
 - `POST /api/auth/register`
 - `POST /api/auth/login`
-- `POST /api/ai/policy-advisor`
 
 Protected endpoints:
 - `GET /api/auth/me`
@@ -93,6 +98,8 @@ Protected endpoints:
 - `GET /api/policies/{id}`
 - `GET /api/policies/{id}/claims`
 - `POST /api/policies/{id}/claims`
+- `POST /api/ai/policy-advisor`
+- `GET /api/ai/history`
 
 ### Security Controls
 
@@ -118,7 +125,8 @@ Protected endpoints:
 - `POST /api/policies/{id}/claims` - Submit new claim (Protected)
 
 ### AI Advisor
-- `POST /api/ai/policy-advisor` - Get policy recommendations from AI
+- `POST /api/ai/policy-advisor` - Get policy recommendations from AI (Protected)
+- `GET /api/ai/history` - Get last advisor conversations (Protected)
 
 ## Data Flow
 

@@ -13,6 +13,7 @@ class User(db.Model):
     
     policies = db.relationship('Policy', backref='user', lazy=True, cascade='all, delete-orphan')
     claims = db.relationship('Claim', backref='user', lazy=True, cascade='all, delete-orphan')
+    chat_history = db.relationship('ChatHistory', backref='user', lazy=True, cascade='all, delete-orphan')
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -80,4 +81,25 @@ class Claim(db.Model):
             'description': self.description,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
+        }
+
+
+class ChatHistory(db.Model):
+    __tablename__ = 'chat_history'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_prompt = db.Column(db.Text, nullable=False)
+    ai_summary = db.Column(db.Text, nullable=False)
+    recommended_policy_name = db.Column(db.String(120), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'user_prompt': self.user_prompt,
+            'ai_summary': self.ai_summary,
+            'recommended_policy_name': self.recommended_policy_name,
+            'created_at': self.created_at.isoformat()
         }

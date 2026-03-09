@@ -1,13 +1,12 @@
 import pytest
+import os
 from app import create_app, db
-from app.models import User, Policy, Claim
-import json
 
 @pytest.fixture
 def app():
+    os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
     app = create_app()
     app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     
     with app.app_context():
         db.create_all()
@@ -133,10 +132,33 @@ class TestAI:
         assert data['status'] == 'ok'
         assert 'Hello from InsureSmart AI backend' in data['message']
 
-    def test_policy_advisor(self, client):
+    def test_policy_advisor_requires_auth(self, client):
+        response = client.post('/api/ai/policy-advisor', json={'user_input': 'health plan'})
+        assert response.status_code == 401
+
+    def test_policy_advisor_returns_valid_recommendation(self, client, auth_token):
+        headers = {'Authorization': f'Bearer {auth_token}'}
         response = client.post('/api/ai/policy-advisor',
-            json={'user_input': 'I need health insurance'}
+            json={'user_input': 'I need health insurance for my family'},
+            headers=headers
         )
         assert response.status_code == 200
         data = response.get_json()
-        assert 'recommendations' in data
+        assert data['provider'] in ['openai', 'fallback']
+        assert 'message' in data
+        assert isinstance(data['recommendations'], list)
+
+    def test_policy_advisor_history_persists(self, client, auth_token):
+        headers = {'Authorization': f'Bearer {auth_token}'}
+        advisor_response = client.post(
+            '/api/ai/policy-advisor',
+            json={'user_input': 'I need auto insurance for a new car'},
+            headers=headers
+        )
+        assert advisor_response.status_code == 200
+
+        history_response = client.get('/api/ai/history', headers=headers)
+        assert history_response.status_code == 200
+        history_data = history_response.get_json()
+        assert len(history_data) >= 1
+        assert history_data[0]['user_prompt']

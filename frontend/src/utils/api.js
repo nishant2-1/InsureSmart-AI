@@ -36,7 +36,8 @@ export const policyAPI = {
 
 export const aiAPI = {
   getPolicyRecommendations: (userInput) =>
-    api.post('/ai/policy-advisor', { user_input: userInput })
+    api.post('/ai/policy-advisor', { user_input: userInput }),
+  getChatHistory: () => api.get('/ai/history')
 };
 
 export const systemAPI = {

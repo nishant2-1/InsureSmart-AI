@@ -1,4 +1,4 @@
-# InsureSmart AI
+# InsureSmart AI - Next-Gen Insurance Portal
 
 InsureSmart AI is a full-stack insurance portal with a React frontend, a Python Flask backend, and a MySQL database. The project is documented in SDLC phases to demonstrate production engineering practices expected by UK software teams.
 
@@ -14,6 +14,19 @@ This repository is intentionally structured to show a senior engineering mindset
 - Secure implementation patterns
 - Test-driven quality checks
 - Deployment planning for Azure
+
+## Core Features
+
+- Chat-to-Insight Advisor for policy recommendations
+- Secure login with JWT and hashed passwords
+- Policy management dashboard with active coverage tracking
+- Conversation history persistence for AI consultations
+
+## Three-Tier Architecture Data Flow
+
+1. Frontend (Presentation): React captures user needs, such as travel or health insurance requests.
+2. Backend (Logic): Flask validates JWT authentication and processes the AI advisor request.
+3. Database (Storage): MySQL stores users, policies, claims, and AI chat history records.
 
 ## SDLC Phase 1: Requirements Gathering
 
@@ -55,6 +68,7 @@ Core database tables:
 - `users`
 - `policies`
 - `claims`
+- `chat_history`
 
 Core API endpoints:
 - `GET /api/hello`
@@ -67,6 +81,7 @@ Core API endpoints:
 - `GET /api/policies/{id}/claims`
 - `POST /api/policies/{id}/claims`
 - `POST /api/ai/policy-advisor`
+- `GET /api/ai/history`
 
 ## SDLC Phase 3: Implementation Standards
 
@@ -130,6 +145,7 @@ The repository includes an issue template at `.github/ISSUE_TEMPLATE/bug_report.
 - Target deployment: Azure Static Web Apps.
 - Deployment checklist: `docs/DEPLOYMENT.md`.
 - Architecture and HLD/LLD notes: `docs/ARCHITECTURE.md`.
+- Sprint implementation playbook: `docs/SDLC_SPRINT_PLAYBOOK.md`.
 
 ## Tech Stack
 
@@ -186,6 +202,12 @@ InsureSmart AI/
 ├── docs/
 └── .github/
 ```
+
+## Future Roadmap
+
+- Add PDF generation for insurance certificates.
+- Add CI/CD quality gates with test and lint checks.
+- Add role-based access for admin and support operations.
 
 ## Copilot Prompt Sequence Used
 
