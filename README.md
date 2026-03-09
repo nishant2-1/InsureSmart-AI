@@ -182,7 +182,7 @@ The repository includes an issue template at `.github/ISSUE_TEMPLATE/bug_report.
 - Target deployment: Azure Static Web Apps.
 - Deployment checklist: `docs/DEPLOYMENT.md`.
 - Architecture and HLD/LLD notes: `docs/ARCHITECTURE.md`.
-- Sprint implementation playbook: `docs/SDLC_SPRINT_PLAYBOOK.md`.
+- Sprint implementation log: `docs/ENGINEERING_LOG.md`.
 
 ## Tech Stack
 
