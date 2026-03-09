@@ -1,5 +1,13 @@
 # Deployment Guide - InsureSmart AI
 
+## Recommended Azure Architecture
+
+- Frontend: Azure Static Web Apps (React build from `frontend/`)
+- Backend: Azure App Service (Flask API from `backend/`)
+- Database: Azure Database for MySQL
+
+This repository uses two GitHub workflows for that split deployment.
+
 ## Quick Deployment to Azure Static Web Apps
 
 ### Step 1: Prerequisites
@@ -136,6 +144,30 @@ az webapp config appsettings set \
 
 - `GET https://insuresmart-api.azurewebsites.net/api/hello`
 - `POST https://insuresmart-api.azurewebsites.net/api/auth/login`
+
+## GitHub Secrets You Must Configure
+
+For `.github/workflows/azure-static-web-apps.yml`:
+- `AZURE_STATIC_WEB_APPS_API_TOKEN`
+- `REACT_APP_API_URL` (set to App Service API URL, e.g. `https://insuresmart-api.azurewebsites.net/api`)
+
+For `.github/workflows/azure-backend-appservice.yml`:
+- `AZURE_WEBAPP_NAME`
+- `AZURE_WEBAPP_PUBLISH_PROFILE`
+
+Application settings on App Service:
+- `DATABASE_URL`
+- `JWT_SECRET_KEY`
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
+
+## One-Time Setup Checklist
+
+1. Create Azure Static Web App and copy deployment token.
+2. Create Azure App Service and download publish profile.
+3. Add all required GitHub repository secrets.
+4. Push to `main` to trigger both workflows.
+5. Verify frontend and backend health endpoints.
 
 ## Alternative: Deploy to Render
 

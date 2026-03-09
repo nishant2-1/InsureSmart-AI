@@ -9,6 +9,8 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.db
+backend/instance/
 
 # Frontend
 node_modules/

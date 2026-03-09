@@ -10,6 +10,11 @@ policy_bp = Blueprint('policy', __name__, url_prefix='/api/policies')
 ai_bp = Blueprint('ai', __name__, url_prefix='/api/ai')
 
 
+def _get_current_user_id():
+    # JWT identity is stored as string for compatibility with strict JWT validators.
+    return int(get_jwt_identity())
+
+
 @core_bp.route('/hello', methods=['GET'])
 def hello_world():
     return jsonify({
@@ -46,11 +51,11 @@ def login():
         return jsonify({'error': 'Missing email or password'}), 400
     
     user = user_repository.get_by_email(data['email'])
-    
+
     if not user or not user.check_password(data['password']):
         return jsonify({'error': 'Invalid email or password'}), 401
-    
-    access_token = create_access_token(identity=user.id)
+
+    access_token = create_access_token(identity=str(user.id))
     return jsonify({
         'message': 'Login successful',
         'access_token': access_token,
@@ -61,7 +66,7 @@ def login():
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
 def get_user():
-    user_id = get_jwt_identity()
+    user_id = _get_current_user_id()
     user = user_repository.get_by_id(user_id)
     
     if not user:
@@ -74,7 +79,7 @@ def get_user():
 @policy_bp.route('', methods=['GET'])
 @jwt_required()
 def get_policies():
-    user_id = get_jwt_identity()
+    user_id = _get_current_user_id()
     policies = policy_repository.list_for_user(user_id)
     
     return jsonify([policy.to_dict() for policy in policies]), 200
@@ -83,7 +88,7 @@ def get_policies():
 @policy_bp.route('', methods=['POST'])
 @jwt_required()
 def create_policy():
-    user_id = get_jwt_identity()
+    user_id = _get_current_user_id()
     data = request.get_json() or {}
     
     required_fields = ['policy_type', 'coverage_amount', 'monthly_premium']
@@ -98,7 +103,7 @@ def create_policy():
 @policy_bp.route('/<int:policy_id>', methods=['GET'])
 @jwt_required()
 def get_policy(policy_id):
-    user_id = get_jwt_identity()
+    user_id = _get_current_user_id()
     policy = policy_repository.get_for_user(policy_id, user_id)
     
     if not policy:
@@ -111,7 +116,7 @@ def get_policy(policy_id):
 @policy_bp.route('/<int:policy_id>/claims', methods=['GET'])
 @jwt_required()
 def get_claims(policy_id):
-    user_id = get_jwt_identity()
+    user_id = _get_current_user_id()
     policy = policy_repository.get_for_user(policy_id, user_id)
     
     if not policy:
@@ -124,7 +129,7 @@ def get_claims(policy_id):
 @policy_bp.route('/<int:policy_id>/claims', methods=['POST'])
 @jwt_required()
 def create_claim(policy_id):
-    user_id = get_jwt_identity()
+    user_id = _get_current_user_id()
     policy = policy_repository.get_for_user(policy_id, user_id)
     
     if not policy:
@@ -144,7 +149,7 @@ def create_claim(policy_id):
 @ai_bp.route('/policy-advisor', methods=['POST'])
 @jwt_required()
 def policy_advisor():
-    user_id = get_jwt_identity()
+    user_id = _get_current_user_id()
     data = request.get_json() or {}
     user_input = data.get('user_input', '').strip()
 
@@ -173,7 +178,7 @@ def policy_advisor():
 @ai_bp.route('/history', methods=['GET'])
 @jwt_required()
 def get_advisor_history():
-    user_id = get_jwt_identity()
+    user_id = _get_current_user_id()
     history_rows = chat_history_repository.list_recent_for_user(user_id, limit=20)
 
     return jsonify([entry.to_dict() for entry in history_rows]), 200
