@@ -17,6 +17,18 @@ Three-tier flow:
 2. Logic tier: Flask validates identity and generates advisor output from OpenAI with a fallback engine.
 3. Storage tier: MySQL persists user profiles, selected policies, and AI consultation history.
 
+## Tech Stack
+
+- Frontend: React
+- Backend: Flask
+- Database: MySQL
+- AI Logic: OpenAI API
+
+## Design Pattern
+
+- RESTful API Architecture for client-server communication.
+- Repository Pattern for database interactions via `backend/app/repositories.py`.
+
 ## Architecture Diagram
 
 ```
@@ -103,7 +115,7 @@ Protected endpoints:
 
 ### Security Controls
 
-- Password hashing via Werkzeug
+- Password hashing via bcrypt
 - Token-based auth via JWT
 - ORM usage via SQLAlchemy to reduce SQL injection risk
 - Environment variable-based secrets handling
