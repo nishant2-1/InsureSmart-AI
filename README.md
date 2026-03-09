@@ -259,3 +259,8 @@ Use these in order while developing new features:
 
 - Issues: `https://github.com/nishant2-1/InsureSmart-AI/issues`
 - Discussions: `https://github.com/nishant2-1/InsureSmart-AI/discussions`
+
+## Team Workflow
+
+- Contribution guide: `CONTRIBUTING.md`
+- Pull request checklist: `.github/PULL_REQUEST_TEMPLATE.md`
