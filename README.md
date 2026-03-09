@@ -1,361 +1,202 @@
-# InsureSmart AI - Complete README
+# InsureSmart AI
 
-An intelligent, full-stack insurance portal powered by AI. Get personalized insurance policy recommendations, manage your policies, and track claims all in one secure platform.
+InsureSmart AI is a full-stack insurance portal with a React frontend, a Python Flask backend, and a MySQL database. The project is documented in SDLC phases to demonstrate production engineering practices expected by UK software teams.
 
-**Live Status**: Coming Soon... (Deployment in progress)
+Live repository: `https://github.com/nishant2-1/InsureSmart-AI`
 
-## 🎯 Why I Built This
+## Why This Project
 
-This project was designed to demonstrate:
-- **Scalability**: Architecture supports millions of users with horizontal scaling
-- **AI Integration**: Real-time natural language processing for policy recommendations
-- **Production-Ready Code**: Enterprise patterns, testing, and documentation
-- **Full-Stack Expertise**: Modern frontend, robust backend, and cloud deployment
+The goal is to solve a clear business problem: users struggle to choose the right insurance plan, and they need AI-assisted guidance with a transparent user dashboard.
 
-## ✨ Key Features
+This repository is intentionally structured to show a senior engineering mindset:
+- Requirement-first development
+- Architecture and API design before scaling features
+- Secure implementation patterns
+- Test-driven quality checks
+- Deployment planning for Azure
 
-✅ **User Authentication**: Secure JWT-based registration and login  
-✅ **AI Policy Advisor**: Describe your needs → get AI-powered recommendations  
-✅ **Dashboard**: View active policies and claims history  
-✅ **Policy Management**: Create, view, and manage insurance policies  
-✅ **Claims System**: Submit and track insurance claims  
-✅ **Responsive Design**: Works seamlessly on desktop, tablet, and mobile  
-✅ **RESTful API**: Well-documented backend API  
-✅ **Unit Tests**: 95%+ code coverage  
+## SDLC Phase 1: Requirements Gathering
 
-## 🏗️ Tech Stack
+### Problem Statement
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | React 18, React Router, Tailwind CSS, Axios |
-| **Backend** | Flask, SQLAlchemy, PyJWT, Python 3.9+ |
-| **Database** | MySQL 8.0 |
-| **AI** | OpenAI API |
-| **Testing** | Pytest (Backend), Jest (Frontend) |
-| **Deployment** | Azure Static Web Apps |
+Users need a faster and more accurate way to discover insurance plans that match their profile and financial goals.
 
-## 🚀 Quick Start
+### Functional Requirements
 
-### Prerequisites
-- Python 3.9+
-- Node.js 16+
-- MySQL 8.0+
-- OpenAI API key
+- The system shall allow a user to register, log in, and log out securely.
+- The system shall allow authenticated users to view active policies.
+- The system shall allow authenticated users to create and view claims history.
+- The system shall provide an AI policy advisor endpoint.
+- The system shall store user, policy, and claim data in a relational database.
+- The system shall expose REST APIs for frontend consumption.
 
-### Backend Setup
+### Non-Functional Requirements
+
+- API responses for core routes should return within 2 seconds under normal development load.
+- Passwords must be hashed and never stored in plain text.
+- Secrets must be loaded from environment variables and never committed to source control.
+- The frontend must support responsive layout for desktop and mobile widths.
+- The backend must include baseline unit tests for critical routes.
+
+## SDLC Phase 2: System Design
+
+### High-Level Design (HLD)
+
+1. React frontend sends HTTP requests via Axios.
+2. Flask backend handles authentication, policy, claims, and AI routes.
+3. SQLAlchemy maps backend models to MySQL tables.
+4. JWT secures protected endpoints.
+
+See full architecture notes in `docs/ARCHITECTURE.md`.
+
+### Low-Level Design (LLD)
+
+Core database tables:
+- `users`
+- `policies`
+- `claims`
+
+Core API endpoints:
+- `GET /api/hello`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `GET /api/policies`
+- `POST /api/policies`
+- `GET /api/policies/{id}`
+- `GET /api/policies/{id}/claims`
+- `POST /api/policies/{id}/claims`
+- `POST /api/ai/policy-advisor`
+
+## SDLC Phase 3: Implementation Standards
+
+### Version Control Strategy
+
+- Commit after each small feature is completed.
+- Use Conventional Commits: `feat:`, `fix:`, `test:`, `docs:`, `refactor:`.
+- Push frequently to show visible development progress.
+
+Suggested feature commit flow:
+1. `feat: add login form validation`
+2. `feat: add policy list filtering`
+3. `test: add auth route regression tests`
+4. `docs: update architecture decisions`
+
+### Clean Code Rules
+
+- Use descriptive names (`registration_date`, not `d`).
+- Keep route handlers small and explicit.
+- Validate request payloads before business logic.
+
+### Environment and Secrets
+
+- Keep secrets in `backend/.env`.
+- Track only `backend/.env.example`.
+- Never commit API keys to GitHub.
+
+## SDLC Phase 4: Testing and QA
+
+### Unit Testing
+
+Backend test command:
 
 ```bash
-# Navigate to backend directory
-cd backend
-
-# Create and activate virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Create .env file
-cp .env.example .env
-
-# Update .env with your database credentials and OpenAI key
-# DATABASE_URL=mysql+pymysql://user:password@localhost/insuresmart_db
-# OPENAI_API_KEY=your_key_here
-
-# Create database
-# Make sure MySQL is running and create database:
-# mysql -u root -p
-# CREATE DATABASE insuresmart_db;
-
-# Run Flask app
-python run.py
-```
-
-Backend runs on: `http://localhost:5000`
-
-### Frontend Setup
-
-```bash
-# Navigate to frontend directory
-cd frontend
-
-# Install dependencies
-npm install
-
-# Start development server
-npm start
-```
-
-Frontend runs on: `http://localhost:3000`
-
-### Run Tests
-
-```bash
-# Backend Tests
 cd backend
 pytest --cov=app tests/
+```
 
-# Frontend Tests (when Jest configured)
+Frontend test command:
+
+```bash
 cd frontend
 npm test
 ```
 
-## 📋 API Documentation
+### Manual Testing Bug Report Process
 
-### Authentication
+For each bug found during manual testing, capture this template in GitHub Issues:
 
-**Register**
-```bash
-POST /api/auth/register
-Content-Type: application/json
+- Expected behavior
+- Actual behavior
+- Steps to reproduce
+- Root cause
+- Fix applied
+- Verification result
 
-{
-  "email": "user@example.com",
-  "password": "SecurePass123!",
-  "full_name": "John Doe"
-}
-```
+The repository includes an issue template at `.github/ISSUE_TEMPLATE/bug_report.yml`.
 
-**Login**
-```bash
-POST /api/auth/login
-Content-Type: application/json
+## SDLC Phase 5: Deployment and Documentation
 
-{
-  "email": "user@example.com",
-  "password": "SecurePass123!"
-}
+- Target deployment: Azure Static Web Apps.
+- Deployment checklist: `docs/DEPLOYMENT.md`.
+- Architecture and HLD/LLD notes: `docs/ARCHITECTURE.md`.
 
-# Response
-{
-  "access_token": "eyJhbGc...",
-  "user": { "id": 1, "email": "user@example.com" }
-}
-```
+## Tech Stack
 
-### Policies
+- Frontend: React 18, React Router, Tailwind CSS, Axios
+- Backend: Flask, SQLAlchemy, Flask-JWT-Extended
+- Database: MySQL
+- AI: OpenAI API integration path via backend route
+- Testing: Pytest and React Testing Library
+- Deployment: Azure Static Web Apps
 
-**Get All Policies**
-```bash
-GET /api/policies
-Authorization: Bearer {access_token}
-```
+## Quick Start
 
-**Create Policy**
-```bash
-POST /api/policies
-Authorization: Bearer {access_token}
-Content-Type: application/json
+### Prerequisites
 
-{
-  "policy_type": "Health",
-  "coverage_amount": 200000,
-  "monthly_premium": 50,
-  "description": "Family coverage"
-}
-```
+- Python 3.9+
+- Node.js 16+
+- MySQL 8+
 
-### AI Advisor
-
-**Get Policy Recommendations**
-```bash
-POST /api/ai/policy-advisor
-Content-Type: application/json
-
-{
-  "user_input": "I need health insurance for my family"
-}
-
-# Response
-{
-  "message": "Found 2 policies for you",
-  "recommendations": [
-    {
-      "id": 1,
-      "name": "Premium Health",
-      "monthly": 50,
-      "coverage": 200000,
-      "description": "Full family coverage"
-    }
-  ]
-}
-```
-
-## 🧪 Testing
+### Backend
 
 ```bash
-# Run all backend tests
 cd backend
-pytest
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+python run.py
+```
 
-# Run with coverage report
-pytest --cov=app tests/
+Backend URL: `http://localhost:5000`
 
-# Run specific test file
-pytest tests/test_api.py
+### Frontend
 
-# Run frontend tests
+```bash
 cd frontend
-npm test -- --coverage
+npm install
+npm start
 ```
 
-## 📁 Project Structure
+Frontend URL: `http://localhost:3000`
 
-```
+### Hello World Connection Check
+
+Run both apps, then confirm:
+- Browser home page shows `API Connection: Hello from InsureSmart AI backend`
+- Direct API check: `GET http://localhost:5000/api/hello`
+
+## Project Structure
+
+```text
 InsureSmart AI/
 ├── backend/
-│   ├── app/
-│   │   ├── __init__.py          # Flask app factory
-│   │   ├── models.py            # Database models
-│   │   ├── routes.py            # API endpoints
-│   │   └── requirements.txt     # Python dependencies
-│   ├── tests/
-│   │   ├── test_api.py          # API tests
-│   │   └── test_models.py       # Model tests
-│   ├── .env.example             # Environment variables template
-│   └── run.py                   # Application entry point
-│
 ├── frontend/
-│   ├── src/
-│   │   ├── pages/               # React pages
-│   │   ├── components/          # Reusable components
-│   │   ├── utils/               # API client, contexts
-│   │   ├── styles/              # Tailwind CSS
-│   │   ├── App.js               # Main component
-│   │   └── index.js             # React entry point
-│   ├── public/
-│   │   └── index.html           # HTML template
-│   ├── package.json             # NPM dependencies
-│   ├── tailwind.config.js       # Tailwind configuration
-│   └── .env.example             # Environment variables
-│
 ├── docs/
-│   ├── ARCHITECTURE.md          # System design
-│   ├── API.md                   # Detailed API docs
-│   └── DEPLOYMENT.md            # Deployment guide
-│
-├── .gitignore                   # Git ignore rules
-└── README.md                    # This file
+└── .github/
 ```
 
-## 🔐 Security Features
+## Copilot Prompt Sequence Used
 
-- ✅ Password hashing with Werkzeug
-- ✅ JWT token-based authentication  
-- ✅ Protected API routes with JWT middleware
-- ✅ SQL injection prevention via SQLAlchemy ORM
-- ✅ CORS configuration for safe cross-origin requests
-- ✅ Environment variables for sensitive data
+Use these in order while developing new features:
 
-## 📊 Database Schema
+1. "I am building an Insurance AI portal. Help me write a Software Requirement Specification list for the core features."
+2. "Help me design a MySQL database schema for a user-based insurance portal with AI history."
+3. "Help me write the boilerplate for a Flask API that connects to MySQL."
+4. "Write 3 unit tests for my login route using Pytest."
 
-### Users Table
-```sql
-CREATE TABLE users (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  email VARCHAR(120) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  full_name VARCHAR(120) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
+## Support
 
-### Policies Table
-```sql
-CREATE TABLE policies (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  user_id INT NOT NULL,
-  policy_type VARCHAR(50) NOT NULL,
-  coverage_amount FLOAT NOT NULL,
-  monthly_premium FLOAT NOT NULL,
-  status VARCHAR(20) DEFAULT 'active',
-  start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  end_date TIMESTAMP,
-  description TEXT,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
-```
-
-### Claims Table
-```sql
-CREATE TABLE claims (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  user_id INT NOT NULL,
-  policy_id INT NOT NULL,
-  claim_amount FLOAT NOT NULL,
-  status VARCHAR(20) DEFAULT 'pending',
-  description TEXT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (policy_id) REFERENCES policies(id)
-);
-```
-
-## 🚢 Deployment
-
-### Deploy to Azure Static Web Apps
-
-1. **Create Azure account** and sign up for Azure Static Web Apps
-2. **Link GitHub repository** to Azure
-3. **Configure build settings**:
-   - Frontend build command: `npm run build`
-   - API location: `backend`
-4. **Set environment variables** in Azure Portal
-5. **Deploy**: Push to main branch and Azure handles the rest!
-
-See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed instructions.
-
-## 📈 Future Enhancements
-
-- [ ] OpenAI GPT integration for advanced recommendations
-- [ ] Payment gateway integration (Stripe)
-- [ ] Email notifications for policy updates
-- [ ] Mobile app (React Native)
-- [ ] Analytics dashboard with charts
-- [ ] PDF policy generation
-- [ ] Multi-language support
-- [ ] Admin panel for policy management
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'feat: Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 Git Commit Convention
-
-Follow conventional commits for clear history:
-
-```
-feat: Add policy recommendation feature
-fix: Resolve CORS issue in API
-docs: Update README with setup instructions
-test: Add 95% coverage for auth routes
-style: Format code with Prettier
-refactor: Simplify API response handling
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see [LICENSE.md](LICENSE.md) for details.
-
-## 👨‍💼 Author
-
-**InsureSmart AI Development Team**
-
-Building intelligent insurance solutions for a better tomorrow.
-
-## 📞 Support
-
-- 📧 Email: support@insuresmart.ai
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/InsureSmart-AI/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/InsureSmart-AI/discussions)
-
----
-
-⭐ If you found this helpful, please consider giving it a star!
+- Issues: `https://github.com/nishant2-1/InsureSmart-AI/issues`
+- Discussions: `https://github.com/nishant2-1/InsureSmart-AI/discussions`

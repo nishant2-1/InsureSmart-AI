@@ -2,7 +2,15 @@
 
 ## System Overview
 
-InsureSmart AI is a full-stack intelligent insurance portal built with modern technologies. This document outlines the system architecture and component interactions.
+InsureSmart AI is a full-stack insurance platform with clear HLD and LLD documentation so engineering decisions are traceable.
+
+## HLD (High-Level Design)
+
+System context:
+- React frontend provides user-facing workflows.
+- Flask backend provides authentication, policy, claims, and AI endpoints.
+- MySQL stores persistent relational data.
+- JWT secures protected requests.
 
 ## Architecture Diagram
 
@@ -62,7 +70,38 @@ InsureSmart AI is a full-stack intelligent insurance portal built with modern te
 - **Testing**: Pytest, Jest
 - **Deployment**: Azure Static Web Apps
 
-## API Endpoints
+## LLD (Low-Level Design)
+
+### Database Entities
+
+- `users`: account identity and credentials
+- `policies`: user policy ownership and lifecycle data
+- `claims`: claim records tied to user and policy
+
+### API Contract
+
+Public endpoints:
+- `GET /api/hello`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/ai/policy-advisor`
+
+Protected endpoints:
+- `GET /api/auth/me`
+- `GET /api/policies`
+- `POST /api/policies`
+- `GET /api/policies/{id}`
+- `GET /api/policies/{id}/claims`
+- `POST /api/policies/{id}/claims`
+
+### Security Controls
+
+- Password hashing via Werkzeug
+- Token-based auth via JWT
+- ORM usage via SQLAlchemy to reduce SQL injection risk
+- Environment variable-based secrets handling
+
+## Endpoint Reference
 
 ### Authentication
 - `POST /api/auth/register` - Register new user
@@ -83,18 +122,8 @@ InsureSmart AI is a full-stack intelligent insurance portal built with modern te
 
 ## Data Flow
 
-1. User registers/logs in via the frontend
-2. Backend validates credentials and issues JWT token
-3. Frontend stores token in localStorage
-4. Subsequent requests include JWT in Authorization header
-5. Backend validates token before processing protected routes
-6. Data is persisted in MySQL database
-7. AI advisor processes natural language input and returns recommendations
-
-## Security Measures
-
-- Password hashing with Werkzeug
-- JWT token-based authentication
-- Protected routes with JWT middleware
-- CORS configuration for frontend-backend communication
-- SQL injection prevention via SQLAlchemy ORM
+1. Client authenticates using `/api/auth/login`.
+2. Backend returns JWT token.
+3. Client sends token in `Authorization: Bearer <token>`.
+4. Backend verifies token and executes protected route logic.
+5. SQLAlchemy persists and retrieves data from MySQL.

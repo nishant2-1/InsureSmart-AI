@@ -1,0 +1,80 @@
+name: Bug Report
+description: Report a defect found during manual or automated testing.
+title: "[BUG] "
+labels:
+  - bug
+  - qa
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please complete all sections so the issue can be reproduced and fixed quickly.
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should happen?
+      placeholder: "AI advisor should return one or more policy recommendations."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead?
+      placeholder: "API returned 500 with timeout message."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Provide ordered steps.
+      placeholder: |
+        1. Login with test account
+        2. Open AI Advisor
+        3. Enter prompt
+        4. Click Submit
+    validations:
+      required: true
+
+  - type: textarea
+    id: root_cause
+    attributes:
+      label: Suspected root cause
+      description: If known, what caused the defect?
+      placeholder: "Missing environment variable OPENAI_API_KEY in backend runtime."
+    validations:
+      required: false
+
+  - type: textarea
+    id: fix
+    attributes:
+      label: Fix applied
+      description: Describe the code/config change.
+      placeholder: "Added env var and fallback validation in route handler."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: verification
+    attributes:
+      label: Verification result
+      options:
+        - pending
+        - passed
+        - failed
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, and branch/commit.
+      placeholder: "macOS 14, Chrome 124, main@bed9060"
+    validations:
+      required: true
