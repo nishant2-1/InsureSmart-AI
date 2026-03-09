@@ -218,11 +218,16 @@ Backend URL: `http://localhost:5000`
 
 ```bash
 cd frontend
+cp .env.example .env
 npm install
 npm start
 ```
 
 Frontend URL: `http://localhost:3000`
+
+Required frontend env:
+- `REACT_APP_API_URL=http://localhost:5000/api` (local)
+- `REACT_APP_API_URL=https://<your-backend-app>.azurewebsites.net/api` (Azure)
 
 ### Hello World Connection Check
 
