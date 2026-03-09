@@ -17,10 +17,47 @@ This repository is intentionally structured to show a senior engineering mindset
 
 ## Core Features
 
-- Chat-to-Insight Advisor for policy recommendations
-- Secure login with JWT and hashed passwords
-- Policy management dashboard with active coverage tracking
-- Conversation history persistence for AI consultations
+- 🛡️ Chat-to-Insight Advisor for policy recommendations
+- 🔐 Secure login with JWT and bcrypt password hashing
+- 📊 Policy management dashboard with active coverage tracking
+- 🗂️ Conversation history persistence for AI consultations
+- ⚡ Defensive fallback mode when AI provider is unavailable
+
+## Quick Start (Visual)
+
+- 🚀 Backend Setup
+
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+python run.py
+```
+
+- 💻 Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+- 🌱 Seed Demo Data
+
+```bash
+cd backend
+python seed.py
+```
+
+## UI Preview
+
+Add a screenshot after running the app and save it as `docs/images/dashboard.png`:
+
+```markdown
+![InsureSmart Dashboard](docs/images/dashboard.png)
+```
 
 ## Three-Tier Architecture Data Flow
 
@@ -150,11 +187,11 @@ The repository includes an issue template at `.github/ISSUE_TEMPLATE/bug_report.
 ## Tech Stack
 
 - Frontend: React 18, React Router, Tailwind CSS, Axios
-- Backend: Flask, SQLAlchemy, Flask-JWT-Extended
+- Backend: Flask, SQLAlchemy, Flask-JWT-Extended, Repository Pattern
 - Database: MySQL
 - AI: OpenAI API integration path via backend route
 - Testing: Pytest and React Testing Library
-- Deployment: Azure Static Web Apps
+- Deployment: Azure Static Web Apps, Azure App Service
 
 ## Quick Start
 
