@@ -179,19 +179,38 @@ The repository includes an issue template at `.github/ISSUE_TEMPLATE/bug_report.
 
 ## SDLC Phase 5: Deployment and Documentation
 
-- Target deployment: Azure Static Web Apps.
-- Deployment checklist: `docs/DEPLOYMENT.md`.
-- Architecture and HLD/LLD notes: `docs/ARCHITECTURE.md`.
-- Sprint implementation log: `docs/ENGINEERING_LOG.md`.
+**Deployment Platform Choice:**
+
+This project was initially configured for Azure Static Web Apps and Azure App Service deployment. However, **Azure requires an active billing account and credit card verification** to deploy applications, even to free tiers. 
+
+For demonstration and job application purposes, **we have switched to free-tier hosting platforms**:
+ - **Frontend:** Vercel (free, instant deployment from GitHub)
+ - **Backend:** Render (free tier with persistent app hosting)
+
+These platforms provide:
+ - ✅ Free hosting without billing requirements
+ - ✅ Automatic deployments from GitHub
+ - ✅ HTTPS and custom domains
+ - ✅ Environment variable management
+ - ✅ Production-ready performance
+
+**Live Application URLs:**
+ - Frontend: [Coming soon - will be added after deployment]
+ - Backend API: [Coming soon - will be added after deployment]
+
+**Documentation:**
+ - Deployment checklist: `docs/DEPLOYMENT.md`
+ - Architecture and HLD/LLD notes: `docs/ARCHITECTURE.md`
+ - Sprint implementation log: `docs/ENGINEERING_LOG.md`
 
 ## Tech Stack
 
 - Frontend: React 18, React Router, Tailwind CSS, Axios
 - Backend: Flask, SQLAlchemy, Flask-JWT-Extended, Repository Pattern
-- Database: MySQL
-- AI: OpenAI API integration path via backend route
+ - Database: SQLite (development), MySQL (production-ready)
+ - AI: OpenAI API with fallback handling
 - Testing: Pytest and React Testing Library
-- Deployment: Azure Static Web Apps, Azure App Service
+ - Deployment: Vercel (frontend), Render (backend)
 
 ## Quick Start
 
