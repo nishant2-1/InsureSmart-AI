@@ -5,6 +5,7 @@ Generates QR codes for authenticator apps like Google Authenticator, Authy, Micr
 
 import pyotp
 import qrcode
+from qrcode.constants import ERROR_CORRECT_L
 import io
 import base64
 
@@ -32,7 +33,7 @@ def generate_qr_code_base64(uri):
     """
     qr = qrcode.QRCode(
         version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        error_correction=ERROR_CORRECT_L,
         box_size=10,
         border=4,
     )
@@ -43,7 +44,7 @@ def generate_qr_code_base64(uri):
     
     # Convert to base64
     buffer = io.BytesIO()
-    img.save(buffer, format='PNG')
+    img.save(buffer, 'PNG')
     buffer.seek(0)
     img_base64 = base64.b64encode(buffer.read()).decode('utf-8')
     
