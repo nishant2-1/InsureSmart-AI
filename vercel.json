@@ -1,9 +1,5 @@
 {
   "version": 2,
-  "name": "insuresmart-ai",
-  "buildCommand": "cd frontend && npm install && npm run build",
-  "outputDirectory": "frontend/build",
-  "framework": "create-react-app",
   "rewrites": [
     {
       "source": "/(.*)",
