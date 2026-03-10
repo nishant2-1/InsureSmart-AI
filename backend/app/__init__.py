@@ -13,7 +13,18 @@ def create_app():
     app = Flask(__name__)
     
     # Config
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql+pymysql://root:password@localhost/insuresmart_db')
+    # Ensure instance directory exists for SQLite
+    db_url = os.getenv('DATABASE_URL', 'mysql+pymysql://root:password@localhost/insuresmart_db')
+    if db_url.startswith('sqlite:///'):
+        # Extract path from sqlite URL and create directory
+        db_path = db_url.replace('sqlite:///', '')
+        if db_path.startswith('./'):
+            db_path = db_path[2:]  # Remove './' prefix
+        db_dir = os.path.dirname(db_path)
+        if db_dir and not os.path.exists(db_dir):
+            os.makedirs(db_dir, exist_ok=True)
+    
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'dev-secret-key')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
