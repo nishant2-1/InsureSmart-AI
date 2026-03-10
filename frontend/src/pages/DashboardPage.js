@@ -97,6 +97,7 @@ export default function DashboardPage() {
   );
 
   const formatGBP = (amount) => `GBP ${Number(amount).toLocaleString('en-GB')}`;
+  const websiteLink = typeof window !== 'undefined' ? window.location.origin : '';
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -118,6 +119,18 @@ export default function DashboardPage() {
               AI Advisor
             </button>
           </nav>
+
+          <div className="mt-8 rounded-lg border border-cyan-500/30 bg-cyan-500/10 p-3">
+            <p className="text-xs uppercase tracking-wide text-cyan-300">Website Link</p>
+            <a
+              href={websiteLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 block break-all text-sm text-cyan-200 underline hover:text-cyan-100"
+            >
+              {websiteLink || 'Link will appear after page loads'}
+            </a>
+          </div>
         </aside>
 
         <main className="space-y-6">
