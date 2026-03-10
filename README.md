@@ -4,6 +4,11 @@ InsureSmart AI is a full-stack insurance portal with a React frontend, a Python 
 
 Live repository: `https://github.com/nishant2-1/InsureSmart-AI`
 
+## Live Demo
+
+- Frontend (Vercel): `https://insure-smart-61bbigs5z-nishant2-1s-projects.vercel.app`
+- Backend API (Render): `https://insuresmart-ai.onrender.com`
+
 ## Why This Project
 
 The goal is to solve a clear business problem: users struggle to choose the right insurance plan, and they need AI-assisted guidance with a transparent user dashboard.
@@ -195,8 +200,8 @@ These platforms provide:
  - ✅ Production-ready performance
 
 **Live Application URLs:**
- - Frontend: [Coming soon - will be added after deployment]
- - Backend API: [Coming soon - will be added after deployment]
+ - Frontend: `https://insure-smart-61bbigs5z-nishant2-1s-projects.vercel.app`
+ - Backend API: `https://insuresmart-ai.onrender.com`
 
 **Documentation:**
  - Deployment checklist: `docs/DEPLOYMENT.md`
@@ -246,7 +251,7 @@ Frontend URL: `http://localhost:3000`
 
 Required frontend env:
 - `REACT_APP_API_URL=http://localhost:5000/api` (local)
-- `REACT_APP_API_URL=https://<your-backend-app>.azurewebsites.net/api` (Azure)
+- `REACT_APP_API_URL=https://insuresmart-ai.onrender.com/api` (production)
 
 ### Hello World Connection Check
 
