@@ -6,6 +6,9 @@ export default function DashboardPage() {
   const [historyEntries, setHistoryEntries] = useState([]);
   const [chatTranscript, setChatTranscript] = useState([]);
   const [advisorInput, setAdvisorInput] = useState('');
+  const [advisorProvider, setAdvisorProvider] = useState('');
+  const [advisorReason, setAdvisorReason] = useState('');
+  const [advisorNotice, setAdvisorNotice] = useState('');
   const [loadingPolicies, setLoadingPolicies] = useState(true);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [advisorLoading, setAdvisorLoading] = useState(false);
@@ -47,6 +50,9 @@ export default function DashboardPage() {
     }
 
     setAdvisorError('');
+    setAdvisorProvider('');
+    setAdvisorReason('');
+    setAdvisorNotice('');
     const prompt = advisorInput.trim();
     setChatTranscript((prev) => [...prev, { role: 'user', content: prompt }]);
     setAdvisorInput('');
@@ -54,6 +60,14 @@ export default function DashboardPage() {
     try {
       setAdvisorLoading(true);
       const response = await aiAPI.getPolicyRecommendations(prompt);
+      const provider = response.data.provider || 'fallback';
+      const reason = response.data.reason || '';
+      setAdvisorProvider(provider);
+      setAdvisorReason(reason);
+      if (provider === 'fallback') {
+        setAdvisorNotice(response.data.message || 'AI advisor is running in fallback mode.');
+      }
+
       const topRecommendation = response.data.recommendations?.[0]?.name;
       const advisorMessage = topRecommendation
         ? `${response.data.message} Best match: ${topRecommendation}.`
@@ -179,6 +193,13 @@ export default function DashboardPage() {
 
               {advisorError && (
                 <p className="mt-3 rounded-lg bg-rose-500/20 px-3 py-2 text-sm text-rose-300">{advisorError}</p>
+              )}
+
+              {advisorProvider === 'fallback' && (
+                <div className="mt-3 rounded-lg border border-amber-500/40 bg-amber-500/15 px-3 py-2 text-sm text-amber-200">
+                  <p className="font-medium">{advisorNotice || 'AI advisor is currently in fallback mode.'}</p>
+                  {advisorReason && <p className="mt-1 text-amber-100">{advisorReason}</p>}
+                </div>
               )}
 
               <div className="mt-5 space-y-3 rounded-xl border border-slate-800 bg-slate-950 p-3">
