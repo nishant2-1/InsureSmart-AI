@@ -1,7 +1,7 @@
 import json
 import os
-
-import openai
+import urllib.error
+import urllib.request
 
 
 OFFLINE_MESSAGE = 'The AI advisor is currently offline, please check our manual policy list.'
@@ -74,6 +74,13 @@ def _keyword_fallback_recommendation(user_input, offline=False):
     }
 
 
+def _fallback_with_message(user_input, summary, reason):
+    result = _keyword_fallback_recommendation(user_input, offline=False)
+    result['summary'] = summary
+    result['reason'] = reason
+    return result
+
+
 def _parse_ai_json(content):
     try:
         return json.loads(content)
@@ -90,27 +97,41 @@ def get_policy_advice(user_input):
     if not api_key or api_key.startswith('your_'):
         return _keyword_fallback_recommendation(user_input, offline=True)
 
-    openai.api_key = api_key
-    model = os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
-
-    system_prompt = (
-        'You are a professional insurance advisor. Use the provided JSON list of policies to '
-        'recommend the best one to the user based on their needs. If no policy fits, explain why politely. '
-        'Respond with valid JSON only using this schema: '
-        '{"summary": string, "recommended_policy_name": string|null, "reason": string}.'
-    )
-
     try:
-        response = openai.ChatCompletion.create(
-            model=model,
-            temperature=0.2,
-            messages=[
+        model = os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
+
+        system_prompt = (
+            'You are a professional insurance advisor. Use the provided JSON list of policies to '
+            'recommend the best one to the user based on their needs. If no policy fits, explain why politely. '
+            'Respond with valid JSON only using this schema: '
+            '{"summary": string, "recommended_policy_name": string|null, "reason": string}.'
+        )
+
+        payload = {
+            'model': model,
+            'temperature': 0.2,
+            'messages': [
                 {'role': 'system', 'content': system_prompt},
                 {'role': 'user', 'content': f'Policies JSON: {json.dumps(INSURANCE_POLICIES)}'},
                 {'role': 'user', 'content': f'User request: {user_input}'}
             ]
+        }
+
+        request = urllib.request.Request(
+            url='https://api.openai.com/v1/chat/completions',
+            data=json.dumps(payload).encode('utf-8'),
+            headers={
+                'Authorization': f'Bearer {api_key}',
+                'Content-Type': 'application/json'
+            },
+            method='POST'
         )
-        content = response.choices[0].message['content']
+
+        # Hard timeout prevents UI from hanging on "Consulting...".
+        with urllib.request.urlopen(request, timeout=12) as response:
+            response_data = json.loads(response.read().decode('utf-8'))
+
+        content = response_data['choices'][0]['message']['content']
         parsed = _parse_ai_json(content)
 
         policy_name = parsed.get('recommended_policy_name')
@@ -128,7 +149,27 @@ def get_policy_advice(user_input):
             'recommendations': matched,
             'provider': 'openai'
         }
-    except openai.error.OpenAIError:
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode('utf-8', errors='ignore')
+        print(f"OpenAI HTTP error {e.code}: {error_body}")
+        if e.code == 429:
+            return _fallback_with_message(
+                user_input,
+                'AI advisor is in fallback mode because OpenAI quota is exhausted.',
+                'Top matching policies are shown using local recommendation rules. Add billing or switch to a funded API key to restore live AI answers.'
+            )
+        if e.code in (401, 403):
+            return _fallback_with_message(
+                user_input,
+                'AI advisor is in fallback mode because the OpenAI key is invalid or unauthorized.',
+                'Update OPENAI_API_KEY in backend/.env with a valid key to restore live AI answers.'
+            )
         return _keyword_fallback_recommendation(user_input, offline=True)
-    except Exception:
+    except TimeoutError:
+        print('OpenAI request timed out after 12s')
+        return _keyword_fallback_recommendation(user_input, offline=True)
+    except Exception as e:
+        import traceback
+        print(f"OpenAI error: {e}")
+        print(f"Traceback: {traceback.format_exc()}")  # Full traceback for debugging
         return _keyword_fallback_recommendation(user_input, offline=True)
